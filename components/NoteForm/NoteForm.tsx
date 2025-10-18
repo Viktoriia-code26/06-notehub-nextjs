@@ -3,14 +3,14 @@ import * as Yup from "yup";
 import css from "./NoteForm.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createNote } from "../../lib/api";
-import type { NewNoteData } from "../../types/note";
+import type { NewNoteData, NoteTag } from "../../types/note";
 
  interface NoteFormProps {
   onSuccess: () => void;
   onClose: () => void;
 }
 
-const allTags = ["Todo", "Work", "Personal", "Meeting", "Shopping"] as const;
+const allTags: NoteTag[] = ["Todo", "Work", "Personal", "Meeting", "Shopping"];
 
 const validationSchema = Yup.object({
   title: Yup.string()
@@ -20,8 +20,8 @@ const validationSchema = Yup.object({
   content: Yup.string()
     .max(500, "Content must be at max 500 characters")
     .optional(),
-  tag: Yup.string()
-    .oneOf([...allTags], "Invalid tag selected")
+  tag: Yup.mixed<NoteTag>()
+    .oneOf(allTags, "Invalid tag selected")
     .required("Please select a tag"),
 });
 
@@ -37,7 +37,7 @@ export default function NoteForm({ onSuccess, onClose }: NoteFormProps) {
   });
 
   return (
-    <Formik
+    <Formik<NewNoteData>
       initialValues={{ title: "", content: "", tag: "Todo" }}
       validationSchema={validationSchema}
       onSubmit={(values, { resetForm }) => {
